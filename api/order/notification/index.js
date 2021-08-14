@@ -15,18 +15,38 @@ function makeid(length) {
   return result;
 }
 
+function formatRupiah(angka, prefix) {
+  var number_string = angka.replace(/[^,\d]/g, "").toString(),
+    split = number_string.split(","),
+    sisa = split[0].length % 3,
+    rupiah = split[0].substr(0, sisa),
+    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+  // tambahkan titik jika yang di input sudah menjadi angka ribuan
+  if (ribuan) {
+    separator = sisa ? "." : "";
+    rupiah += separator + ribuan.join(".");
+  }
+
+  rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+  return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+}
+
 router.post("/", async function (req, res, next) {
   try {
     console.log(req.body);
     if (
       req.body.merchantName == undefined ||
       req.body.paymentURL == undefined ||
-      req.body.number == undefined
+      req.body.number == undefined ||
+      req.body.paymentAmount == undefined
     ) {
       res.status(400).send("Missing mandatory parameter");
     } else {
       let randomString = await makeid(5);
       let sourceURL = req.body.paymentURL;
+      let paymentAmount = await formatRupiah(req.body.paymentAmount, "Rp.");
+      let merchantName = req.body.merchantName;
       let expectURL = `${req.body.merchantName}-${randomString}`;
       let number = req.body.number;
       let dataShortener = qs.stringify({
@@ -39,7 +59,7 @@ router.post("/", async function (req, res, next) {
         apiShortener.config
       );
       let shortLink = resultShortener.data.short;
-      let bodySMS = `Segera lakukan pembayaran anda di link berikut ${shortLink}`;
+      let bodySMS = `Segera lakukan pembayaran anda di Toko ${merchantName} dengan total ${paymentAmount} di Link berikut ${shortLink}`;
       let dataSMS = qs.stringify({
         msisdn: number,
         content: bodySMS,
