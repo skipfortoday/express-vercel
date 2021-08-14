@@ -47,7 +47,10 @@ router.post("/", async function (req, res, next) {
       let sourceURL = req.body.paymentURL;
       let paymentAmount = await formatRupiah(req.body.paymentAmount, "Rp.");
       let merchantName = req.body.merchantName;
-      let expectURL = `${req.body.merchantName}-${randomString}`;
+      let expectURL = `${req.body.merchantName.replace(
+        / /g,
+        "-"
+      )}-${randomString}`;
       let number = req.body.number;
       let dataShortener = qs.stringify({
         url: sourceURL,
