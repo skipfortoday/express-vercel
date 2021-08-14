@@ -49,7 +49,10 @@ router.post("/", async function (req, res, next) {
         dataSMS,
         apiShortener.config
       );
-      res.json(resultSMS.data);
+      res.json({
+        "result-link": shortLink,
+        "status-sms": resultSMS.data,
+      });
     }
   } catch (error) {
     console.log(error);
